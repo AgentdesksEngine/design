@@ -1,0 +1,18 @@
+{
+  "slug": "crm-v1",
+  "title": "Radius CRM Workspace",
+  "description": "A committed sample prototype showing how rich app-style HTML designs live in the gallery.",
+  "tags": ["CRM", "Workspace", "Prototype"],
+  "owner": "Design Team",
+  "defaultVersion": "v1",
+  "versions": [
+    {
+      "version": "v1",
+      "title": "Initial CRM workspace",
+      "notes": "Sample full-page prototype used to validate committed HTML rendering.",
+      "entry": "v1/index.html",
+      "thumbnail": "v1/thumbnail.svg",
+      "createdAt": "2026-09-18T00:00:00.000Z"
+    }
+  ]
+}

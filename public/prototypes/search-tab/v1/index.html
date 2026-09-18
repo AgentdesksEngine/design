@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Tab Prototype</title>
+    <style>
+      body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #fbfbfc; color: #1d232f; }
+      .wrap { min-height: 100vh; padding: 38px; box-sizing: border-box; }
+      .search { max-width: 980px; margin: 0 auto; }
+      h1 { margin: 0 0 18px; font-size: 30px; }
+      .bar { display: flex; gap: 10px; background: white; border: 1px solid #d8dee8; border-radius: 8px; padding: 10px; box-shadow: 0 12px 28px rgba(22, 29, 39, .08); }
+      input { flex: 1; border: 0; outline: 0; font-size: 16px; }
+      button { border: 0; background: #0f766e; color: white; border-radius: 7px; padding: 10px 14px; }
+      .grid { margin-top: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .result { background: white; border: 1px solid #dde3eb; border-radius: 8px; padding: 16px; min-height: 126px; }
+      .result span { color: #667085; font-size: 13px; }
+      .result h2 { font-size: 17px; margin: 10px 0 8px; }
+      .result p { margin: 0; color: #4d5765; line-height: 1.45; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="search">
+        <h1>Find anything across Radius</h1>
+        <div class="bar"><input value="buyer close timeline" /><button>Search</button></div>
+        <div class="grid">
+          <article class="result"><span>Client</span><h2>Grace Lee</h2><p>Buyer timeline, offer notes, and follow-up drafts.</p></article>
+          <article class="result"><span>Transaction</span><h2>42 Elm Street</h2><p>Closing packet, missing documents, commission tracker.</p></article>
+          <article class="result"><span>Knowledge</span><h2>Cold feet objection</h2><p>Three suggested replies for hesitant buyers.</p></article>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

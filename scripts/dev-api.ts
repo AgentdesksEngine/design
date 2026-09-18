@@ -1,0 +1,147 @@
+import http from 'node:http';
+import { readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { loadDotenv } from './_lib';
+
+loadDotenv();
+process.env.VERCEL_ENV ??= 'development';
+
+const API_DIR = path.resolve('api');
+const PORT = Number(process.env.API_PORT ?? 3002);
+
+interface Route {
+  pattern: string[];
+  file: string;
+}
+
+function collectRoutes(dir = API_DIR, prefix: string[] = []): Route[] {
+  const out: Route[] = [];
+  for (const entry of readdirSync(dir)) {
+    if (entry.startsWith('_')) continue;
+    const full = path.join(dir, entry);
+    if (statSync(full).isDirectory()) out.push(...collectRoutes(full, [...prefix, entry]));
+    else if (/\.(ts|js)$/.test(entry) && !/\.test\./.test(entry)) {
+      const name = entry.replace(/\.(ts|js)$/, '');
+      out.push({ pattern: name === 'index' ? prefix : [...prefix, name], file: full });
+    }
+  }
+  const rank = (p: string[]) =>
+    p.filter((s) => s.startsWith('[')).length + (p.some((s) => s.startsWith('[...')) ? 100 : 0);
+  return out.sort((a, b) => rank(a.pattern) - rank(b.pattern));
+}
+
+function match(route: Route, segments: string[]): Record<string, string | string[]> | null {
+  const params: Record<string, string | string[]> = {};
+  for (let i = 0; i < route.pattern.length; i++) {
+    const p = route.pattern[i]!;
+    if (p.startsWith('[...') && p.endsWith(']')) {
+      const rest = segments.slice(i);
+      if (!rest.length) return null;
+      params[p.slice(4, -1)] = rest.map((x) => decodeURIComponent(x));
+      return params;
+    }
+    const s = segments[i];
+    if (s === undefined) return null;
+    if (p.startsWith('[') && p.endsWith(']')) params[p.slice(1, -1)] = decodeURIComponent(s);
+    else if (p !== s) return null;
+  }
+  return route.pattern.length === segments.length ? params : null;
+}
+
+function parseCookies(header: string | undefined) {
+  const out: Record<string, string> = {};
+  for (const part of header?.split(';') ?? []) {
+    const [k, ...v] = part.trim().split('=');
+    if (k) out[k] = decodeURIComponent(v.join('='));
+  }
+  return out;
+}
+
+async function readBody(req: http.IncomingMessage): Promise<{ body: unknown; raw: string | undefined }> {
+  const chunks: Buffer[] = [];
+  for await (const c of req) chunks.push(c as Buffer);
+  if (!chunks.length) return { body: undefined, raw: undefined };
+  const text = Buffer.concat(chunks).toString('utf8');
+  if ((req.headers['content-type'] ?? '').includes('application/json')) {
+    try {
+      return { body: JSON.parse(text), raw: text };
+    } catch {
+      return { body: text, raw: text };
+    }
+  }
+  return { body: text, raw: text };
+}
+
+const routes = collectRoutes();
+console.log(`[dev-api] ${routes.length} routes`);
+
+http
+  .createServer(async (req, res) => {
+    const url = new URL(req.url ?? '/', `http://localhost:${PORT}`);
+    const segments = url.pathname.replace(/^\/api\/?/, '').split('/').filter(Boolean);
+    let params: Record<string, string | string[]> | null = null;
+    let route: Route | undefined;
+    for (const r of routes) {
+      params = match(r, segments);
+      if (params) {
+        route = r;
+        break;
+      }
+    }
+    if (!route || !params) {
+      res.writeHead(404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: `No API route for ${url.pathname}` }));
+      return;
+    }
+
+    const vreq = req as http.IncomingMessage & {
+      query: Record<string, string | string[]>;
+      cookies: Record<string, string>;
+      body: unknown;
+      rawBody?: string;
+    };
+    vreq.query = { ...Object.fromEntries(url.searchParams), ...params };
+    vreq.cookies = parseCookies(req.headers.cookie);
+    const parsed = await readBody(req);
+    vreq.body = parsed.body;
+    vreq.rawBody = parsed.raw;
+
+    const vres = res as http.ServerResponse & {
+      status: (code: number) => typeof vres;
+      json: (body: unknown) => void;
+      send: (body: unknown) => void;
+      redirect: (statusOrUrl: number | string, url?: string) => void;
+    };
+    vres.status = (code) => {
+      res.statusCode = code;
+      return vres;
+    };
+    vres.json = (body) => {
+      if (!res.hasHeader('content-type')) res.setHeader('content-type', 'application/json; charset=utf-8');
+      res.end(JSON.stringify(body));
+    };
+    vres.send = (body) => {
+      if (typeof body === 'object' && body !== null && !Buffer.isBuffer(body)) vres.json(body);
+      else res.end(body as string);
+    };
+    vres.redirect = (statusOrUrl, maybeUrl) => {
+      const status = typeof statusOrUrl === 'number' ? statusOrUrl : 307;
+      const target = typeof statusOrUrl === 'number' ? maybeUrl! : statusOrUrl;
+      res.statusCode = status;
+      res.setHeader('Location', target);
+      res.end();
+    };
+
+    try {
+      const mod = await import(pathToFileURL(route.file).href);
+      await mod.default(vreq, vres);
+    } catch (err) {
+      console.error(`[dev-api] ${req.method} ${url.pathname} crashed:`, err);
+      if (!res.headersSent) {
+        res.writeHead(500, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'crash' }));
+      }
+    }
+  })
+  .listen(PORT, () => console.log(`[dev-api] listening on http://localhost:${PORT}`));

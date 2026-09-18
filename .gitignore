@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.env.local
+.vercel
+*.log
+coverage
+*.tsbuildinfo
+/api/**/*.js
+/api/**/*.d.ts
+/scripts/**/*.js
+/scripts/**/*.d.ts
+/shared/**/*.js
+/shared/**/*.d.ts

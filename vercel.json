@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/designs/:slug/versions/:version/status", "destination": "/api/designs/:slug/versions/:version/status" },
+    { "source": "/api/designs/:slug/:sub", "destination": "/api/designs/:slug/:sub" },
+    { "source": "/((?!api/|assets/|prototypes/).*)", "destination": "/index.html" }
+  ]
+}

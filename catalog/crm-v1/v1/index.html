@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRM Workspace Prototype</title>
+    <style>
+      :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      body { margin: 0; background: #f6f7f9; color: #15171a; }
+      .crm { min-height: 100vh; display: grid; grid-template-columns: 232px 1fr 312px; }
+      aside { background: #fff; border-right: 1px solid #dde1e7; padding: 18px 14px; }
+      .brand { font-weight: 760; letter-spacing: .02em; margin-bottom: 24px; }
+      .nav { display: grid; gap: 6px; }
+      .nav span { padding: 9px 10px; border-radius: 7px; color: #59616f; }
+      .nav .on { background: #eef4ff; color: #174a99; font-weight: 650; }
+      main { padding: 22px; }
+      header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+      h1 { margin: 0; font-size: 24px; }
+      button { border: 1px solid #cfd6df; background: #111827; color: white; border-radius: 7px; padding: 9px 12px; }
+      .toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
+      .toolbar input { flex: 1; border: 1px solid #cfd6df; border-radius: 7px; padding: 10px 12px; }
+      table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #dde1e7; border-radius: 8px; overflow: hidden; }
+      th, td { padding: 12px; border-bottom: 1px solid #edf0f4; text-align: left; font-size: 14px; }
+      th { color: #697280; font-size: 12px; text-transform: uppercase; }
+      .pill { display: inline-flex; border-radius: 999px; padding: 4px 8px; background: #e9f7ef; color: #17643a; font-size: 12px; }
+      .panel { background: #fff; border-left: 1px solid #dde1e7; padding: 20px; }
+      .card { border: 1px solid #dde1e7; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="crm">
+      <aside>
+        <div class="brand">Radius CRM</div>
+        <div class="nav">
+          <span class="on">Clients</span>
+          <span>Transactions</span>
+          <span>Property search</span>
+          <span>Messages</span>
+          <span>Reporting</span>
+        </div>
+      </aside>
+      <main>
+        <header>
+          <h1>Clients</h1>
+          <button>New client</button>
+        </header>
+        <div class="toolbar">
+          <input placeholder="Search people, emails, or groups" />
+          <button>Filter</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Status</th><th>Agent</th><th>Last activity</th></tr></thead>
+          <tbody>
+            <tr><td>Emily Robinson</td><td><span class="pill">Active buyer</span></td><td>Ashutosh</td><td>2m ago</td></tr>
+            <tr><td>Daniel Scott</td><td><span class="pill">Listing prep</span></td><td>Mel</td><td>1h ago</td></tr>
+            <tr><td>Grace Lee</td><td><span class="pill">Follow-up</span></td><td>Priya</td><td>Yesterday</td></tr>
+          </tbody>
+        </table>
+      </main>
+      <section class="panel">
+        <div class="card"><strong>Mel Copilot</strong><p>Draft follow-up, prep tour notes, and summarize pipeline risk.</p></div>
+        <div class="card"><strong>Today</strong><p>4 tours, 2 contract reviews, 1 closing packet.</p></div>
+      </section>
+    </div>
+  </body>
+</html>
